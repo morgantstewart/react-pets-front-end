@@ -5,13 +5,19 @@ import PetList from './components/PetList/PetList';
 import PetDetail from './components/PetDetail/PetDetail';
 import PetForm from './components/PetForm/PetForm';
 
-
 const App = () => {
   const [pets, setPets] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const handleSelect = (pet) => {
     setSelected(pet);
+    // Close the form if it's open when a new pet is selected.
+    setIsFormOpen(false);
+  };
+
+  const handleFormView = () => {
+    setIsFormOpen(!isFormOpen);
   };
 
   useEffect(() => {
@@ -33,8 +39,17 @@ const App = () => {
 
   return (
     <>
-      <PetList pets={pets} handleSelect={handleSelect}/>
-      <PetDetail selected={selected} />
+      <PetList
+        pets={pets}
+        handleSelect={handleSelect}
+        handleFormView={handleFormView}
+        isFormOpen={isFormOpen}
+      />
+      {isFormOpen ? (
+        <PetForm />
+      ) : (
+        <PetDetail selected={selected} />
+      )}
     </>
   );
 };
