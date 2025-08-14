@@ -37,7 +37,43 @@ const create = async (petData) => {
   }
 };
 
+const update = async (formData, petId) => {
+  try {
+    const res = await fetch(`${BASE_URL}/${petId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return res.json();
+  } catch (err) {
+    console.error('Error updating pet:', err);
+    throw err;
+  }
+};
+
+const deletePet = async (petId) => {
+  try {
+    const res = await fetch(`${BASE_URL}/${petId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return res.json();
+  } catch (err) {
+    console.error('Error deleting pet:', err);
+    throw err;
+  }
+};
+
 export {
   index,
   create,
+  update,
+  deletePet,
 };

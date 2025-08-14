@@ -1,59 +1,97 @@
+// src/App.jsx
 
 import { useState, useEffect } from 'react';
+
 import * as petService from './services/petService';
+
 import PetList from './components/PetList/PetList';
 import PetDetail from './components/PetDetail/PetDetail';
 import PetForm from './components/PetForm/PetForm';
 
-const App = () => {
+function App() {
   const [pets, setPets] = useState([]);
   const [selected, setSelected] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-
-  const handleSelect = (pet) => {
-    setSelected(pet);
-    // Close the form if it's open when a new pet is selected.
-    setIsFormOpen(false);
-  };
-
-
-  const handleFormView = (pet) => {
-    if (!pet._id) setSelected(null);
-    setIsFormOpen(!isFormOpen);
-  };
-
-
-  const handleAddPet = async (formData) => {
-    try {
-      const newPet = await petService.create(formData);
-      // Add the pet object and the current pets to a new array, and
-      // set that array as the new pets
-      setPets([newPet, ...pets]);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   useEffect(() => {
     const fetchPets = async () => {
       try {
         const fetchedPets = await petService.index();
-        // Don't forget to pass the error object to the new Error
+
         if (fetchedPets.err) {
           throw new Error(fetchedPets.err);
         }
+
         setPets(fetchedPets);
       } catch (err) {
-        // Log the error object
         console.log(err);
       }
     };
     fetchPets();
   }, []);
 
-  return (
-   // src/App.jsx
+  const handleSelect = (pet) => {
+    setSelected(pet);
+    setIsFormOpen(false);
+  };
 
+  const handleFormView = (pet) => {
+    if (!pet._id) setSelected(null);
+    setIsFormOpen(!isFormOpen);
+  };
+
+  const handleAddPet = async (formData) => {
+    try {
+      const newPet = await petService.create(formData);
+
+      if (newPet.err) {
+        throw new Error(newPet.err);
+      }
+
+      setPets([newPet, ...pets]);
+      setIsFormOpen(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleUpdatePet = async (formData, petId) => {
+    try {
+      const updatedPet = await petService.update(formData, petId);
+
+      if (updatedPet.err) {
+        throw new Error(updatedPet.err);
+      }
+
+      const updatedPetList = pets.map((pet) => (
+        pet._id !== updatedPet._id ? pet : updatedPet
+      ));
+
+      setPets(updatedPetList);
+      setSelected(updatedPet);
+      setIsFormOpen(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleDeletePet = async (petId) => {
+    try {
+      const deletedPet = await petService.deletePet(petId);
+
+      if (deletedPet.err) {
+        throw new Error(deletedPet.err);
+      }
+
+      setPets(pets.filter((pet) => pet._id !== deletedPet._id));
+      setSelected(null);
+      setIsFormOpen(false);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  return (
     <>
       <PetList
         pets={pets}
@@ -61,15 +99,21 @@ const App = () => {
         handleFormView={handleFormView}
         isFormOpen={isFormOpen}
       />
-      {/* Pass selected to PetForm and handleFormView to PetDetail */}
       {isFormOpen ? (
-        <PetForm handleAddPet={handleAddPet} selected={selected} />
+        <PetForm
+          handleAddPet={handleAddPet}
+          selected={selected}
+          handleUpdatePet={handleUpdatePet}
+        />
       ) : (
-        <PetDetail selected={selected} handleFormView={handleFormView}/>
+        <PetDetail
+          selected={selected}
+          handleFormView={handleFormView}
+          handleDeletePet={handleDeletePet}
+        />
       )}
     </>
-
   );
-};
+}
 
 export default App;
