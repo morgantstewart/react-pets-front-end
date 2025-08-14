@@ -23,8 +23,9 @@ const App = () => {
   const handleAddPet = async (formData) => {
     try {
       const newPet = await petService.create(formData);
-      setPets([...pets, newPet]);
-      setIsFormOpen(false);
+      // Add the pet object and the current pets to a new array, and
+      // set that array as the new pets
+      setPets([newPet, ...pets]);
     } catch (err) {
       console.log(err);
     }
@@ -47,8 +48,6 @@ const App = () => {
     fetchPets();
   }, []);
 
-
-  
   return (
     <>
       <PetList
