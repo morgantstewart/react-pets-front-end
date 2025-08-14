@@ -47,6 +47,8 @@ const App = () => {
     fetchPets();
   }, []);
 
+
+  
   return (
     <>
       <PetList
